@@ -1,299 +1,245 @@
-# Student Grade Prediction Project
-## ทำนายผลการเรียนของนักศึกษาด้วย Machine Learning
+# Student Grade Prediction - โปรเจค Machine Learning ทำนายผลการเรียน
 
-โครงงานนี้ใช้ Machine Learning เพื่อทำนายผลการเรียนของนักศึกษาในเทอมถัดไป โดยอิงจากข้อมูลการเข้าเรียนและผลการเรียนในอดีต
+⚠️ **สำคัญ: โปรเจคนี้ใช้ข้อมูลจำลอง (SYNTHETIC DATA) เพื่อการศึกษาเท่านั้น ข้อมูลนักศึกษาทั้งหมดถูกสร้างขึ้นแบบสุ่มและไม่ใช่ข้อมูลจริง**
 
----
+## 📊 ภาพรวมโปรเจค
 
-## 🎯 วัตถุประสงค์
+โปรเจคนี้ใช้ Machine Learning ในการทำนายเกรดของนักศึกษาจากข้อมูลผลการเรียนในอดีตและพฤติกรรมการเรียน เป้าหมายคือการระบุนักศึกษากลุ่มเสี่ยงตั้งแต่เนิ่นๆ เพื่อให้ความช่วยเหลือได้ทันท่วงที
 
-**Business Question**: ผลการเรียนของนักศึกษาเป็นอย่างไรบ้าง
+**คำถามทางธุรกิจ:** ผลการเรียนของนักศึกษาเป็นอย่างไรบ้าง?
 
-**Data Science Question**: เราสามารถใช้ข้อมูลในอดีตและพฤติกรรมการเรียนของนักศึกษา เพื่อสร้างโมเดล ML สำหรับทำนายเกรดที่นักศึกษาน่าจะได้รับในเทอมหน้า ได้หรือไม่
+**คำถาม Data Science:** เราสามารถทำนายเกรดของนักศึกษาในเทอมถัดไปได้หรือไม่ โดยใช้ข้อมูลผลการเรียนในอดีตและพฤติกรรมการเรียน?
 
----
+## 🎯 ผลลัพธ์หลัก
 
-## 📊 ข้อมูล
-
-### Dataset
-ข้อมูลการเข้าเรียนและผลการเรียนของนักศึกษา จาก **3 รายวิชา**:
-- SJ111777
-- SJ220777  
-- SJ333777 (Target - วิชาที่ต้องการทำนาย)
-
-### ไฟล์ข้อมูล (7 ตาราง)
-```
-synthetic_data/
-├── ID_Group.csv                        # ข้อมูลพื้นฐาน: StudentID, Group, GPA
-├── SJ111777_Attendance15weeks.csv      # การเข้าเรียน 15 สัปดาห์
-├── SJ111777_Score.csv                  # คะแนนต่างๆ
-├── SJ220777_Attendance15weeks.csv      # การเข้าเรียน 15 สัปดาห์
-├── SJ220777_Score.csv                  # คะแนนต่างๆ
-├── SJ333777_Attendance15weeks.csv      # การเข้าเรียน 15 สัปดาห์
-└── S333777_Score.csv                   # คะแนนต่างๆ (Target)
-```
-
----
-
-## 🚀 Quick Start
-
-### 1. ติดตั้ง Dependencies
-
-```bash
-pip install numpy pandas matplotlib seaborn scikit-learn joblib
-```
-
-### 2. สร้างข้อมูล Synthetic
-
-```bash
-python3 data-cr-test.py
-```
-
-ผลลัพธ์: โฟลเดอร์ `synthetic_data/` มีไฟล์ CSV 7 ไฟล์
-
-### 3. รัน Pipeline หลัก
-
-```bash
-python3 student_grade_prediction.py
-```
-
-ผลลัพธ์:
-- `analysis_output/` - กราฟและการวิเคราะห์ (6 ไฟล์ PNG)
-- `models/` - โมเดลที่เทรนแล้ว (best_model.pkl, scaler.pkl)
-
-### 4. ทดสอบการทำนาย
-
-```bash
-python3 predict_new_students.py
-```
-
-ผลลัพธ์: ทำนายคะแนนนักศึกษา 3 คน (Demo)
-
-### 5. สร้างรายงานนำเสนอ
-
-```bash
-python3 create_presentation_report.py
-```
-
-ผลลัพธ์: `analysis_output/PRESENTATION_REPORT.md` - รายงานฉบับสมบูรณ์
-
----
+- **ความแม่นยำของโมเดล:** 95.87% (R² Score)
+- **ค่าความคลาดเคลื่อนเฉลี่ย:** ±1.72 คะแนน (MAE)
+- **โมเดลที่ดีที่สุด:** Lasso Regression
+- **Features ที่ใช้:** 27 ตัวแปรจากพฤติกรรมและผลการเรียน
 
 ## 📁 โครงสร้างโปรเจค
 
 ```
 datasci/
-├── README.md                           # ไฟล์นี้
-├── data-cr-test.py                     # สร้างข้อมูล synthetic
-├── student_grade_prediction.py         # Pipeline หลัก (EDA + Modeling)
-├── predict_new_students.py             # ทำนายนักศึกษาใหม่
-├── create_presentation_report.py       # สร้างรายงาน
-│
-├── synthetic_data/                     # ข้อมูล (7 ไฟล์)
-│   ├── ID_Group.csv
-│   ├── SJ111777_Attendance15weeks.csv
-│   ├── SJ111777_Score.csv
-│   ├── SJ220777_Attendance15weeks.csv
-│   ├── SJ220777_Score.csv
-│   ├── S333777_Score.csv
-│   └── SJ333777_Attendance15weeks.csv
-│
-├── analysis_output/                    # กราฟและรายงาน
-│   ├── target_distribution.png
-│   ├── correlation_matrix.png
-│   ├── feature_correlation.png
-│   ├── gpa_vs_target.png
-│   ├── attendance_vs_target.png
-│   ├── model_comparison.png
-│   └── PRESENTATION_REPORT.md
-│
-└── models/                             # โมเดลที่บันทึก
-    ├── best_model.pkl
-    ├── scaler.pkl
-    └── feature_names.txt
+├── dataset/                          # 7 ไฟล์ CSV (ข้อมูลจำลอง)
+├── analysis_output/                  # 11 ไฟล์กราฟ PNG
+├── models/                           # โมเดล ML ที่เทรนแล้ว
+├── data-cr-test.py                  # สร้างข้อมูลจำลอง
+├── student_grade_prediction.py      # Pipeline หลักของ ML
+├── data_cleaning_analysis.py        # วิเคราะห์คุณภาพข้อมูล
+├── predict_new_students.py          # ทำนายเกรดนักศึกษาใหม่
+├── generate_report.py               # สร้างรายงานฉบับเต็ม
+├── README.md                        # ไฟล์นี้
+├── PROJECT_OVERVIEW.txt             # เอกสารอธิบายโดยละเอียด
+└── ANALYSIS_REPORT.md               # รายงานการวิเคราะห์ฉบับเต็ม
 ```
 
----
+## 🚀 เริ่มต้นใช้งาน
 
-## 🔬 Methodology
+### 1. ติดตั้ง Python Packages
 
-### 1. Data Cleaning
-- ลบแถวซ้ำ
-- เติมค่าว่างด้วย median
-- จัดการนักศึกษาที่ไม่มีข้อมูลบางวิชา
-
-### 2. Feature Engineering (27 features)
-- **Attendance Features**: อัตราการเข้าเรียน, จำนวนครั้ง, พฤติกรรมการเข้าเรียน
-- **Score Features**: คะแนนแต่ละส่วน (normalized)
-- **Aggregated Features**: ค่าเฉลี่ย, min, max, std ของคะแนนและการเข้าเรียน
-- **Baseline Features**: GPA, Group
-
-### 3. Models Tested
-- Linear Regression
-- Ridge Regression
-- **Lasso Regression** ⭐ (Best)
-- Random Forest
-- Gradient Boosting
-
-### 4. Evaluation
-- Train/Test Split: 80/20
-- Cross-Validation: 5-fold
-- Metrics: R², RMSE, MAE
-
----
-
-## 📈 ผลลัพธ์
-
-### Model Performance
-
-| Metric | Value |
-|--------|-------|
-| **Test R²** | **0.9587** (อธิบายความแปรปรวน 95.87%) |
-| **RMSE** | **2.24** คะแนน |
-| **MAE** | **1.72** คะแนน |
-| **CV R²** | **0.9535** (±0.011) |
-
-### Best Model: Lasso Regression
-
-**เหตุผล**:
-- ✅ Test R² สูงสุด (0.9587)
-- ✅ RMSE ต่ำสุด (2.24)
-- ✅ ไม่ Overfit
-- ✅ Cross-validation สูงและเสถียร
-- ✅ Automatic feature selection
-
----
-
-## 💡 Key Insights
-
-1. **GPA เดิม** มีความสัมพันธ์สูงกับคะแนนในเทอมหน้า (r ≈ 0.85)
-
-2. **คะแนนวิชาก่อนหน้า** เป็นตัวทำนายที่แม่นยำที่สุด (r ≈ 0.92)
-
-3. **การเข้าเรียน** มีผลต่อคะแนน (r ≈ 0.65)
-   - นักศึกษาที่เข้าเรียน > 80% มักได้คะแนนดีกว่า
-
-4. **ความสม่ำเสมอ** มีความสำคัญ
-   - นักศึกษาที่มีคะแนนสม่ำเสมอมีแนวโน้มดีกว่า
-
-### ✅ Hypothesis Validation
-
-**ยืนยันสมมติฐาน**: พฤติกรรมการเรียนในอดีต (GPA, คะแนน, การเข้าเรียน) สามารถทำนายผลการเรียนในอนาคตได้อย่างแม่นยำ (R² > 0.95)
-
----
-
-## 🎯 Business Recommendations
-
-### 1. Early Warning System
-สร้างระบบแจ้งเตือนล่วงหน้าเพื่อระบุกลุ่มเสี่ยง
-
-### 2. Targeted Intervention
-มาตรการช่วยเหลือแบบเจาะจงตามระดับความเสี่ยง:
-
-| Predicted Score | Risk Level | Action |
-|----------------|------------|--------|
-| ≥ 80 | ต่ำ | ส่งเสริมต่อ |
-| 70-79 | ปานกลาง | ติดตามให้คำแนะนำ |
-| 60-69 | สูง | ให้ความช่วยเหลือเร่งด่วน |
-| < 60 | สูงมาก | เข้าพบอาจารย์ทันที |
-
-### 3. Attendance Monitoring
-เพิ่มความสำคัญของการเข้าเรียน และแจ้งเตือนเมื่อขาดเรียนบ่อย
-
-### 4. Continuous Improvement
-วิเคราะห์และปรับปรุงการสอนอย่างต่อเนื่อง
-
----
-
-## 🔮 Next Steps
-
-### Phase 1: Deployment (1-2 เดือน)
-- [ ] ทดสอบโมเดลกับข้อมูลจริง
-- [ ] สร้าง Web API สำหรับทำนาย real-time
-- [ ] พัฒนา Dashboard สำหรับอาจารย์
-- [ ] จัดทำคู่มือการใช้งาน
-
-### Phase 2: Enhancement (3-6 เดือน)
-- [ ] รวบรวมข้อมูลเพิ่มเติม (ประชากรศาสตร์, การมีส่วนร่วม)
-- [ ] ทดลองโมเดลขั้นสูง (Neural Networks, XGBoost)
-- [ ] Retrain โมเดลทุก semester
-- [ ] ขยายไปวิชาอื่นๆ
-
-### Phase 3: Integration (6-12 เดือน)
-- [ ] เชื่อมต่อกับระบบทะเบียน
-- [ ] พัฒนา Mobile App
-- [ ] ระบบแจ้งเตือนอัตโนมัติ
-- [ ] ทำนายความเสี่ยงการออกกลางคัน (Dropout)
-
----
-
-## 🛠️ Technical Stack
-
-- **Python 3.x**
-- **Data Processing**: pandas, numpy
-- **Visualization**: matplotlib, seaborn
-- **Machine Learning**: scikit-learn
-- **Model Persistence**: joblib
-
----
-
-## 📊 Sample Usage
-
-### ทำนายคะแนนนักศึกษาใหม่
-
-```python
-from predict_new_students import StudentGradePredictor
-
-# โหลดโมเดล
-predictor = StudentGradePredictor()
-
-# ข้อมูลนักศึกษา
-student_data = {
-    'GPA': 3.5,
-    'sj111777_score': 85.0,
-    'sj220777_score': 82.0,
-    'avg_attendance_rate': 0.90,
-    # ... (27 features ทั้งหมด)
-}
-
-# ทำนาย
-results = predictor.predict_with_confidence(student_data)
-print(f"คะแนนที่คาดการณ์: {results[0]['predicted_score']:.2f}")
-print(f"ระดับความเสี่ยง: {results[0]['risk_level']}")
-print(f"คำแนะนำ: {results[0]['recommendation']}")
+```bash
+pip install numpy pandas matplotlib seaborn scikit-learn joblib
 ```
 
+หรือใช้:
+```bash
+pip install -r requirements.txt
+```
+
+### 2. สร้างข้อมูลจำลอง
+
+```bash
+python3 data-cr-test.py
+```
+
+สร้างไฟล์ CSV 7 ไฟล์ พร้อมข้อมูลนักศึกษาจำลอง 120 คน ในโฟลเดอร์ `dataset/`
+
+### 3. รัน ML Pipeline
+
+```bash
+python3 student_grade_prediction.py
+```
+
+ทำงาน:
+- ทำความสะอาดข้อมูล
+- สร้าง Features 27 ตัว
+- เทรนโมเดล ML 5 ตัว
+- บันทึกโมเดลที่ดีที่สุด
+- สร้างกราฟ 6 ไฟล์
+
+### 4. วิเคราะห์คุณภาพข้อมูล
+
+```bash
+python3 data_cleaning_analysis.py
+```
+
+สร้างกราฟ 5 ไฟล์ แสดงคุณภาพและการทำความสะอาดข้อมูล
+
+### 5. ทำนายเกรดนักศึกษาใหม่
+
+```bash
+python3 predict_new_students.py
+```
+
+ใช้โมเดลที่เทรนแล้วในการทำนายเกรดของนักศึกษาใหม่
+
+## 📊 รายละเอียดข้อมูล
+
+ข้อมูลจำลองจาก 3 รายวิชา: **SJ111777**, **SJ220777**, และ **S333777**
+
+**7 ตาราง:**
+- `ID_Group.csv` - รหัสนักศึกษา, กลุ่ม, และ GPA
+- `SJ111777_Attendance15weeks.csv` - การเข้าเรียนรายสัปดาห์ (วิชา 1)
+- `SJ111777_Score.csv` - คะแนนต่างๆ ของวิชา 1
+- `SJ220777_Attendance15weeks.csv` - การเข้าเรียนรายสัปดาห์ (วิชา 2)
+- `SJ220777_Score.csv` - คะแนนต่างๆ ของวิชา 2
+- `SJ333777_Attendance15weeks.csv` - การเข้าเรียนรายสัปดาห์ (วิชา 3)
+- `S333777_Score.csv` - คะแนนต่างๆ ของวิชา 3
+
+**ข้อมูลทั้งหมด:** 120 นักศึกษา, 15 สัปดาห์ของการเข้าเรียน, คะแนนจากหลายประเภทการประเมิน
+
+## 📈 กราฟและการวิเคราะห์
+
+### กราฟหลัก (6 ไฟล์)
+
+1. **target_distribution.png** - การกระจายตัวของคะแนนสุดท้าย
+2. **correlation_matrix.png** - ความสัมพันธ์ระหว่างตัวแปรหลัก
+3. **feature_correlation.png** - Top 15 ตัวแปรที่ทำนายได้ดีที่สุด
+4. **gpa_vs_target.png** - ความสัมพันธ์ระหว่าง GPA กับคะแนนที่ทำนาย
+5. **attendance_vs_target.png** - ความสัมพันธ์ระหว่างการเข้าเรียนกับคะแนน
+6. **model_comparison.png** - เปรียบเทียบประสิทธิภาพของ ML models 5 ตัว
+
+### กราฟการทำความสะอาดข้อมูล (5 ไฟล์)
+
+7. **missing_data_heatmap.png** - รูปแบบของข้อมูลที่หายไป
+8. **correlation_heatmap_full.png** - Correlation matrix แบบเต็ม (27 features)
+9. **correlation_heatmap_key_features.png** - Correlation ของ features สำคัญ
+10. **data_quality_summary.png** - สรุปคุณภาพข้อมูล
+11. **before_after_cleaning.png** - เปรียบเทียบก่อนและหลังทำความสะอาด
+
+## 🔍 ข้อค้นพบสำคัญ
+
+1. **GPA เป็นตัวทำนายที่ดีมาก** - มีความสัมพันธ์ 0.79 กับผลการเรียนในอนาคต
+2. **การเข้าเรียนมีความสำคัญ** - มีความสัมพันธ์ 0.68-0.80 กับคะแนน
+3. **ผลการเรียนในอดีตทำนายอนาคตได้** - คะแนนเดิมมีความสัมพันธ์ 0.85-0.96
+4. **โมเดลมีความแม่นยำสูง** - ทำนายได้ถูกต้อง 95.87% ใน test set
+5. **คุณภาพข้อมูลดี** - ข้อมูลหาย <1.5%, ข้อมูลซ้ำ <2%, ความสมบูรณ์ 98.9-100%
+
+## 🎓 เปรียบเทียบ ML Models
+
+| โมเดล | Test R² | RMSE | MAE |
+|-------|---------|------|-----|
+| **Lasso Regression** | **0.9587** | **2.24** | **1.72** |
+| Linear Regression | 0.9584 | 2.24 | 1.72 |
+| Ridge Regression | 0.9584 | 2.24 | 1.72 |
+| Random Forest | 0.9076 | 3.35 | 2.78 |
+| Gradient Boosting | 0.9256 | 3.00 | 2.64 |
+
+**ผู้ชนะ:** Lasso Regression (สมดุลระหว่างความแม่นยำและการ generalize ได้ดีที่สุด)
+
+## 💡 การประยุกต์ใช้งาน
+
+1. **ระบบเตือนภัยล่วงหน้า** - ระบุนักศึกษากลุ่มเสี่ยงตั้งแต่กลางเทอม
+2. **จัดสรรทรัพยากร** - มุ่งเน้นการติวและสนับสนุนไปที่กลุ่มที่ต้องการ
+3. **วางแผนการช่วยเหลือ** - ให้ความช่วยเหลือทางวิชาการแบบเชิงรุก
+4. **ติดตามความคืบหน้า** - ติดตามแนวโน้มของนักศึกษาตลอดเวลา
+5. **วิเคราะห์นโยบาย** - เข้าใจปัจจัยที่ส่งผลต่อผลการเรียน
+
+## 📖 เอกสารโดยละเอียด
+
+สำหรับรายละเอียดเพิ่มเติมเกี่ยวกับแต่ละไฟล์, กราฟ, และฟังก์ชันของโค้ด:
+- **[PROJECT_OVERVIEW.txt](PROJECT_OVERVIEW.txt)** - เอกสารอธิบายครบถ้วน
+- **[ANALYSIS_REPORT.md](ANALYSIS_REPORT.md)** - รายงานการวิเคราะห์ฉบับเต็ม
+
+## 🛠️ คำอธิบายไฟล์ Python
+
+| ไฟล์ | หน้าที่ | ผลลัพธ์ |
+|------|---------|---------|
+| `data-cr-test.py` | สร้างข้อมูลจำลอง | 7 ไฟล์ CSV |
+| `student_grade_prediction.py` | เทรนโมเดล ML | 6 กราฟ + 3 ไฟล์โมเดล |
+| `data_cleaning_analysis.py` | วิเคราะห์คุณภาพข้อมูล | 5 กราฟ |
+| `predict_new_students.py` | ทำนายเกรด | แสดงผลใน Console |
+| `generate_report.py` | สร้างรายงาน | ANALYSIS_REPORT.md |
+
+## ⚙️ Features ที่สร้างขึ้น
+
+**27 features** ที่ถูกดึงมาจากข้อมูลดิบ:
+
+- **คะแนน:** คะแนนที่ปรับมาตรฐานแล้วจาก 3 วิชา (15 features)
+- **ค่ารวม:** คะแนนเฉลี่ย, ต่ำสุด, สูงสุด (3 features)
+- **การเข้าเรียน:** อัตราการเข้าเรียนแต่ละวิชา + เฉลี่ย (4 features)
+- **ข้อมูลพื้นฐาน:** GPA, กลุ่ม (2 features)
+- **สถิติ:** ความแปรปรวนของคะแนน (3 features)
+
+## 📊 รายละเอียดประสิทธิภาพโมเดล
+
+**โมเดลที่ดีที่สุด: Lasso Regression**
+
+```
+Training R²:  0.9984 (99.84%)
+Test R²:      0.9587 (95.87%)
+RMSE:         2.24 คะแนน
+MAE:          1.72 คะแนน
+CV R²:        0.95 ± 0.01
+```
+
+**ความหมาย:**
+- โมเดลอธิบายความแปรปรวนของคะแนนได้ 95.87%
+- ค่าความผิดพลาดเฉลี่ย ±1.72 คะแนน
+- Overfitting ต่ำ (ประสิทธิภาพ training vs test ใกล้เคียงกัน)
+- ผลลัพธ์สม่ำเสมอในการแบ่งข้อมูลหลายๆ แบบ
+
+## 🎯 คำแนะนำในการนำไปใช้
+
+1. **ใช้โมเดลกลางเทอม** เพื่อทำนายเกรดปลายภาค
+2. **ระบุนักศึกษา** ที่คาดว่าจะได้คะแนน < 60
+3. **ให้ความช่วยเหลือ** แก่นักศึกษาที่มี:
+   - อัตราการเข้าเรียน < 80%
+   - GPA < 2.5
+   - มีปัญหาในหลายๆ วิชา
+4. **ติดตามตัวชี้วัดสำคัญ:**
+   - ติดตามการเข้าเรียนทุกสัปดาห์
+   - ติดตามผลงาน/ควิซ
+   - เตือนเมื่อแนวโน้มลดลง
+5. **เทรนโมเดลใหม่** ทุกเทอมด้วยข้อมูลใหม่
+
+## ⚠️ ข้อควรระวัง
+
+**นี่คือข้อมูลจำลอง (SYNTHETIC DATA):**
+- สร้างขึ้นแบบสุ่มเพื่อการสาธิต
+- ไม่ใช่ข้อมูลนักศึกษาจริง
+- รูปแบบทั้งหมดถูกสร้างขึ้นเทียม
+- สำหรับการศึกษาเท่านั้น
+
+**การนำไปใช้จริงต้องมี:**
+- การปฏิบัติตามกฎหมายคุ้มครองข้อมูล (PDPA, FERPA, GDPR)
+- การตรวจสอบด้านจริยธรรมและความลำเอียง
+- การดูแลโดยมนุษย์และความรับผิดชอบ
+- กระบวนการตัดสินใจที่โปร่งใส
+
+## 📦 ความต้องการของระบบ
+
+- Python 3.11 ขึ้นไป
+- numpy
+- pandas
+- matplotlib
+- seaborn
+- scikit-learn
+- joblib
+
+## 📝 สิทธิ์การใช้งาน
+
+โปรเจคนี้สร้างขึ้นเพื่อการศึกษา สามารถนำไปใช้และปรับปรุงได้อย่างอิสระ
+
+## 🤝 การมีส่วนร่วม
+
+นี่เป็นโปรเจคเพื่อการศึกษา ยินดีรับข้อเสนอแนะและการปรับปรุง!
+
+## 📧 ติดต่อ
+
+หากมีคำถามหรือข้อเสนอแนะเกี่ยวกับโปรเจคนี้ กรุณาเปิด issue
+
 ---
 
-## 📖 Documentation
-
-รายละเอียดเพิ่มเติมใน:
-- **PRESENTATION_REPORT.md** - รายงานฉบับเต็ม (20+ หน้า)
-- **analysis_output/** - กราฟและการวิเคราะห์ทั้งหมด
-
----
-
-## 📝 License
-
-This project is created for educational purposes.
-
----
-
-## 🙏 Acknowledgments
-
-- Dataset: Student Learning Analytics (Synthetic Data)
-- Tools: Python, scikit-learn, pandas
-- Visualization: matplotlib, seaborn
-
----
-
-## 📧 Contact
-
-สำหรับคำถามและข้อเสนอแนะ:
-- Project: Student Grade Prediction
-- Date: 2026-10-03
-
----
-
-**สร้างด้วย ❤️ และ Python**
-# Data-SCI
+**จำไว้ว่า:** โปรเจคนี้สาธิตเทคนิค ML โดยใช้ข้อมูลจำลอง ต้องตรวจสอบและทดสอบโมเดลอย่างละเอียดก่อนนำไปใช้ในการศึกษาจริง

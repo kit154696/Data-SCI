@@ -1,0 +1,540 @@
+================================================================================
+STUDENT GRADE PREDICTION - PROJECT OVERVIEW
+================================================================================
+
+⚠️  IMPORTANT NOTICE:
+This project uses SYNTHETIC DATA generated for educational and demonstration
+purposes only. The data is NOT real student information. All student IDs,
+grades, and attendance records are randomly generated to simulate a realistic
+academic dataset.
+
+================================================================================
+PROJECT DESCRIPTION
+================================================================================
+
+Business Question:
+How are students performing academically?
+
+Data Science Question:
+Can we use historical data and student learning behaviors to build a machine
+learning model that predicts the grades students will receive in the next
+semester?
+
+Hypothesis:
+Student performance in future semesters is related to Academic Behavioral
+Features from their past, and these features can be used in a Machine Learning
+model to predict grades in advance for monitoring and identifying at-risk
+students.
+
+================================================================================
+DATASET DESCRIPTION
+================================================================================
+
+The dataset contains attendance and grade information for students taking
+3 courses: SJ111777, SJ220777, and S333777.
+
+Total: 7 related tables (CSV files)
+
+1. ID_Group.csv (Student Groups)
+   - StudentID: Student identifier
+   - Group: Group type
+   - GPA: Current cumulative GPA
+
+2. SJ111777_Attendance15weeks.csv (Attendance for Course 1)
+   - StudentID: Student identifier
+   - Week1-Week15: Weekly attendance (1=present, 0=absent)
+
+3. SJ111777_Score.csv (Grades for Course 1)
+   - StudentID: Student identifier
+   - Tasks(100Points): Task scores (max 100)
+   - Quiz(150Points): Quiz scores (max 150)
+   - Project(100Points): Project scores (max 100)
+   - Midterm(150Points): Midterm exam scores (max 150)
+   - Final(150Points): Final exam scores (max 150)
+   - ScoreGrade(100Points): Final grade (max 100)
+
+4. SJ220777_Attendance15weeks.csv (Attendance for Course 2)
+   - StudentID: Student identifier
+   - Week1-Week15: Weekly attendance (1=present, 0=absent)
+
+5. SJ220777_Score.csv (Grades for Course 2)
+   - StudentID: Student identifier
+   - Tasks(100Points): Task scores (max 100)
+   - Quiz(90Points): Quiz scores (max 90)
+   - Project(90Points): Project scores (max 90)
+   - Midterm(180Points): Midterm exam scores (max 180)
+   - Final(180Points): Final exam scores (max 180)
+   - ScoreGrade(100Points): Final grade (max 100)
+
+6. S333777_Score.csv (Grades for Course 3)
+   - StudentID: Student identifier
+   - Tasks(100Points): Task scores (max 100)
+   - Project(100Points): Project scores (max 100)
+   - Midterm(100Points): Midterm exam scores (max 100)
+   - Final(100Points): Final exam scores (max 100)
+   - ScoreGrade(100Points): Final grade (max 100)
+
+7. SJ333777_Attendance15weeks.csv (Attendance for Course 3)
+   - StudentID: Student identifier
+   - Week1-Week15: Weekly attendance (1=present, 0=absent)
+
+================================================================================
+PROJECT FILES EXPLANATION
+================================================================================
+
+PYTHON SCRIPTS:
+---------------
+
+1. data-cr-test.py
+   Purpose: Generate synthetic student data
+   What it does:
+   - Creates 120 synthetic student records
+   - Generates realistic GPA values (1.5-4.0)
+   - Simulates attendance patterns (70-100% attendance rate)
+   - Creates scores for all 3 courses with realistic distributions
+   - Introduces random missing values (~1%) and duplicates (1-2%)
+   - Saves 7 CSV files in dataset/ folder
+
+   Output: All 7 CSV files in dataset/
+
+2. student_grade_prediction.py
+   Purpose: Main machine learning pipeline
+   What it does:
+   - Loads all 7 CSV files
+   - Cleans data (removes duplicates, fills missing values)
+   - Creates 27 engineered features from raw data:
+     * Normalized scores for each course component
+     * Average scores across courses
+     * Min/max scores
+     * Attendance rates for each course
+     * Average attendance rate
+   - Splits data into train/test sets (80/20)
+   - Trains 5 ML models:
+     * Linear Regression
+     * Ridge Regression
+     * Lasso Regression (Best model)
+     * Random Forest
+     * Gradient Boosting
+   - Evaluates models using R², RMSE, MAE, Cross-validation
+   - Saves the best model to models/ folder
+   - Creates 6 visualization plots
+
+   Output:
+   - 6 PNG files in analysis_output/
+   - 3 model files in models/
+
+3. data_cleaning_analysis.py
+   Purpose: Analyze data quality and cleaning process
+   What it does:
+   - Loads all 7 CSV files
+   - Analyzes missing data patterns
+   - Counts duplicate rows
+   - Calculates data completeness percentages
+   - Creates correlation heatmaps
+   - Visualizes before/after cleaning comparison
+   - Creates 5 visualization plots
+
+   Output: 5 PNG files in analysis_output/
+
+4. predict_new_students.py
+   Purpose: Use trained model to predict grades for new students
+   What it does:
+   - Loads the saved best model
+   - Loads the feature scaler
+   - Creates example new student data
+   - Makes predictions
+   - Shows confidence intervals
+   - Identifies at-risk students (predicted score < 60)
+
+   Output: Predictions printed to console
+
+5. generate_report.py
+   Purpose: Generate comprehensive markdown report
+   What it does:
+   - Compiles all analysis results
+   - Includes all visualizations
+   - Writes detailed findings
+   - Creates actionable recommendations
+
+   Output: ANALYSIS_REPORT.md
+
+HELPER FILES:
+-------------
+
+6. fix_thai_font.py
+   Purpose: Fix Thai font display issues in matplotlib
+   What it does:
+   - Clears matplotlib font cache
+   - Tests different Thai fonts available on system
+   - Creates test visualization
+
+   Output: Font test PNG file
+
+7. setup_thai_font_final.py
+   Purpose: Configure Thai font for matplotlib (if needed)
+   What it does:
+   - Loads Thonburi font directly from system
+   - Configures matplotlib to use Thai font
+   - Creates configuration file
+
+   Output: thai_font_config.py
+
+8. thai_font_config.py
+   Purpose: Reusable font configuration
+   What it does:
+   - Provides font setup code for other scripts
+   - Can be imported to enable Thai text in plots
+
+   Note: Currently not used as all plots are in English
+
+================================================================================
+VISUALIZATION FILES EXPLANATION
+================================================================================
+
+All 11 PNG files are saved in analysis_output/ folder
+
+MAIN ANALYSIS PLOTS (6 files):
+-------------------------------
+
+1. target_distribution.png
+   What it shows:
+   - Histogram: Distribution of final scores for SJ333777
+   - Box plot: Shows median, quartiles, and outliers
+   - Red line: Mean score (66.71)
+
+   Key insights:
+   - Most students score between 60-75
+   - Distribution is relatively normal
+   - Few outliers on both ends
+
+2. correlation_matrix.png
+   What it shows:
+   - Heatmap of correlations between 6 main features
+   - Features: GPA, average attendance, scores from 3 courses
+   - Color: Red (positive correlation), Blue (negative correlation)
+   - Values: Correlation coefficients (-1 to +1)
+
+   Key insights:
+   - All scores highly correlated (0.84-0.96)
+   - GPA correlates strongly with all scores (0.75-0.79)
+   - Attendance correlates moderately with scores (0.68-0.80)
+
+3. feature_correlation.png
+   What it shows:
+   - Horizontal bar chart
+   - Top 15 features ranked by correlation with target score
+   - X-axis: Absolute correlation value
+
+   Key insights:
+   - total_avg_score: Most predictive (0.95 correlation)
+   - score_max, score_min: Also highly predictive
+   - GPA: Strong predictor (0.79 correlation)
+   - Attendance rates: Moderate predictors (0.74-0.80)
+
+4. gpa_vs_target.png
+   What it shows:
+   - Scatter plot with trend line
+   - X-axis: Student's current GPA
+   - Y-axis: Predicted score for SJ333777
+   - Red dashed line: Linear trend
+
+   Key insights:
+   - Clear positive relationship
+   - Higher GPA → Higher predicted score
+   - Some variance (not perfectly linear)
+
+5. attendance_vs_target.png
+   What it shows:
+   - Scatter plot with trend line
+   - X-axis: Average attendance rate (%)
+   - Y-axis: Predicted score for SJ333777
+   - Red dashed line: Linear trend
+
+   Key insights:
+   - Positive relationship between attendance and scores
+   - Students with <80% attendance tend to score lower
+   - High attendance (>90%) associated with better grades
+
+6. model_comparison.png
+   What it shows:
+   - 4 subplots comparing 5 different ML models
+
+   Subplot 1 - R² Score comparison:
+   - Pink bars: Training R²
+   - Gold bars: Test R²
+   - Higher is better (max 1.0)
+   - Shows model accuracy
+
+   Subplot 2 - RMSE comparison:
+   - Orange bars: Root Mean Squared Error
+   - Lower is better
+   - Shows prediction error in points
+
+   Subplot 3 - Prediction vs Actual (for best model - Lasso):
+   - Scatter plot
+   - Red dashed line: Perfect prediction
+   - Points close to line = good predictions
+
+   Subplot 4 - Residual plot:
+   - Green dots: Prediction errors
+   - Red dashed line: Zero error
+   - Random scatter = good model (no bias)
+
+   Key insights:
+   - Lasso Regression is the best model
+   - Test R² = 0.9587 (95.87% accuracy)
+   - RMSE = 2.24 points (average error)
+   - Predictions closely match actual scores
+
+DATA CLEANING ANALYSIS PLOTS (5 files):
+----------------------------------------
+
+7. missing_data_heatmap.png
+   What it shows:
+   - 3 heatmaps side by side (one per course)
+   - Green: Data present
+   - Red: Data missing
+   - Y-axis: Feature names
+   - X-axis: Student index
+
+   Key insights:
+   - Very few missing values overall (~1%)
+   - Missing data appears random (no pattern)
+   - SJ111777: 9/732 missing (1.2%)
+   - SJ220777: 8/714 missing (1.1%)
+   - S333777: 7/610 missing (1.1%)
+
+8. correlation_heatmap_full.png
+   What it shows:
+   - Large heatmap showing ALL 27 features
+   - Color scale: Red (positive), Blue (negative), White (no correlation)
+   - Numbers in cells: Correlation coefficients
+
+   Key insights:
+   - Diagonal is always 1.00 (feature correlates with itself)
+   - Strong correlations between:
+     * Scores from different courses (0.8-0.9)
+     * Normalized scores and raw scores (0.9+)
+   - Attendance features cluster together
+   - GPA correlates with most features
+
+9. correlation_heatmap_key_features.png
+   What it shows:
+   - Smaller, focused heatmap
+   - Shows only 7 most important features:
+     * GPA
+     * Scores from 3 courses
+     * Attendance rates from 3 courses
+
+   Key insights:
+   - Cleaner view than full heatmap
+   - All course scores highly correlated (0.84-0.87)
+   - Attendance rates moderately correlated (0.51-0.57)
+   - Good students excel across all courses
+
+10. data_quality_summary.png
+    What it shows:
+    - 4 subplots summarizing data quality
+
+    Subplot 1 - Missing Data by Dataset:
+    - Orange bars showing count of missing values
+    - S333777: 7 missing, SJ111777: 9 missing, SJ220777: 8 missing
+
+    Subplot 2 - Duplicate Rows by Dataset:
+    - Blue bars showing duplicate count
+    - All datasets: 2 duplicates each
+
+    Subplot 3 - Data Completeness by Table:
+    - Horizontal bars showing % completeness
+    - Green (100%), Yellow (98.9%), scales to 90-100%
+    - All tables: 98.9-100% complete
+
+    Subplot 4 - Record Count by Table:
+    - Teal bars showing number of records
+    - All tables: 117-122 records
+    - Total: 120 unique students
+
+    Key insights:
+    - High data quality overall
+    - Minimal missing data and duplicates
+    - Consistent record counts across tables
+
+11. before_after_cleaning.png
+    What it shows:
+    - Side-by-side comparison
+    - Left side: Before cleaning
+    - Right side: After cleaning
+    - 4 metrics tracked:
+      * Total Records: 363 → 357
+      * Missing Values: 23 → 0
+      * Duplicates: 6 → 0
+      * Usable Records: 334 → 357
+
+    Bottom: Summary box with green background
+    - "✓ Cleaned: Missing values filled, Duplicates removed"
+    - "✓ Improvement: +6.9% usable records"
+
+    Key insights:
+    - Data cleaning improved data quality
+    - Gained 23 usable records (6.9% increase)
+    - All missing values filled with median
+    - All duplicates removed
+
+================================================================================
+MODEL PERFORMANCE SUMMARY
+================================================================================
+
+Best Model: Lasso Regression
+
+Metrics:
+- Training R²: 0.9984 (99.84%)
+- Test R²: 0.9587 (95.87%)
+- RMSE: 2.24 points
+- MAE: 1.72 points
+- Cross-validation R²: 0.95 ± 0.01
+
+What this means:
+- Model explains 95.87% of variance in test scores
+- Average prediction error: ±1.72 points
+- Model generalizes well (low overfitting)
+- Consistent performance across different data splits
+
+Features Used: 27 total
+- GPA
+- Normalized scores from 3 courses (15 features)
+- Average, min, max scores (3 features)
+- Attendance rates from 3 courses (3 features)
+- Average attendance rate (1 feature)
+- Score variance, Group (2 features)
+
+================================================================================
+KEY INSIGHTS
+================================================================================
+
+1. Students with high GPA tend to get better grades
+   - GPA has 0.79 correlation with future performance
+
+2. Attendance matters, but is not the only factor
+   - 0.68-0.80 correlation with scores
+   - Students with >90% attendance perform better
+
+3. Past performance is the best predictor
+   - Previous course scores: 0.85-0.96 correlation
+   - Students who excel in one course tend to excel in others
+
+4. Model is highly accurate
+   - 95.87% prediction accuracy
+   - Can identify at-risk students early
+
+5. Data quality is good
+   - <1.5% missing data
+   - <2% duplicates
+   - 98.9-100% completeness
+
+================================================================================
+ACTIONABLE RECOMMENDATIONS
+================================================================================
+
+1. Early Warning System
+   - Use model to predict grades mid-semester
+   - Identify students predicted to score <60
+   - Provide early intervention and support
+
+2. Targeted Support
+   - Focus on students with:
+     * Low attendance (<80%)
+     * Low GPA (<2.5)
+     * Struggling in multiple courses
+
+3. Monitor Key Indicators
+   - Track attendance weekly
+   - Monitor assignment/quiz performance
+   - Flag declining trends early
+
+4. Continuous Improvement
+   - Retrain model each semester with new data
+   - Track model accuracy over time
+   - Adjust interventions based on results
+
+5. Resource Allocation
+   - Allocate tutoring resources to at-risk groups
+   - Schedule additional office hours proactively
+   - Create peer study groups for struggling students
+
+================================================================================
+HOW TO USE THIS PROJECT
+================================================================================
+
+1. Generate synthetic data:
+   python3 data-cr-test.py
+
+2. Run the full ML pipeline:
+   python3 student_grade_prediction.py
+
+3. Analyze data quality:
+   python3 data_cleaning_analysis.py
+
+4. Make predictions for new students:
+   python3 predict_new_students.py
+
+5. Generate full report:
+   python3 generate_report.py
+
+All visualizations will be saved to analysis_output/
+All trained models will be saved to models/
+
+================================================================================
+REQUIREMENTS
+================================================================================
+
+Python 3.11+
+
+Required packages:
+- numpy
+- pandas
+- matplotlib
+- seaborn
+- scikit-learn
+- joblib
+
+Install with:
+pip install numpy pandas matplotlib seaborn scikit-learn joblib
+
+================================================================================
+IMPORTANT REMINDERS
+================================================================================
+
+⚠️  This is SYNTHETIC DATA - not real student information
+⚠️  For educational and demonstration purposes only
+⚠️  Do not use for actual academic decisions without proper validation
+⚠️  Real-world deployment would require:
+    - Privacy compliance (FERPA, GDPR)
+    - Ethical review
+    - Bias and fairness testing
+    - Human oversight
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+datasci/
+├── dataset/                      # Synthetic data (7 CSV files)
+├── analysis_output/              # Visualizations (11 PNG files)
+├── models/                       # Trained models (3 files)
+├── data-cr-test.py              # Data generation
+├── student_grade_prediction.py   # Main ML pipeline
+├── data_cleaning_analysis.py     # Data quality analysis
+├── predict_new_students.py       # Prediction script
+├── generate_report.py            # Report generation
+├── README.md                     # Project readme
+├── ANALYSIS_REPORT.md            # Full analysis report
+└── PROJECT_OVERVIEW.txt          # This file
+
+================================================================================
+CONTACT & ATTRIBUTION
+================================================================================
+
+This project was created for academic purposes.
+All code and visualizations are available for educational use.
+
+================================================================================
