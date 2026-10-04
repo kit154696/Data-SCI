@@ -1,0 +1,830 @@
+================================================================================
+คู่มือการใช้ข้อมูลจริงกับโปรเจคนี้
+HOW TO USE REAL DATA WITH THIS PROJECT
+================================================================================
+
+⚠️  IMPORTANT: โปรเจคนี้สร้างมาใช้กับข้อมูลจำลอง
+    หากจะใช้ข้อมูลจริง ต้องปฏิบัติตามข้อกำหนดด้านล่างอย่างเคร่งครัด
+
+================================================================================
+📋 สารบัญ
+================================================================================
+
+1. ข้อกำหนดทางกฎหมายและจริยธรรม
+2. โครงสร้างไฟล์ข้อมูลที่ต้องการ
+3. วิธีเตรียมข้อมูลจริง
+4. วิธีรันโปรเจคกับข้อมูลจริง
+5. การปรับแต่งโค้ดสำหรับข้อมูลจริง
+6. ข้อควรระวังและ Best Practices
+7. การประเมินและ Validation
+8. แนวทางปฏิบัติด้าน Privacy
+9. Checklist ก่อนใช้งานจริง
+
+================================================================================
+1. ข้อกำหนดทางกฎหมายและจริยธรรม
+================================================================================
+
+⚠️ ก่อนใช้ข้อมูลจริง คุณต้อง:
+
+A. การขออนุญาต (CONSENT)
+--------------------------
+□ ได้รับอนุญาตจากสถาบันการศึกษา
+□ ได้รับความยินยอมจากนักศึกษา (ถ้าจำเป็น)
+□ ผ่านการอนุมัติจากคณะกรรมการจริยธรรม (IRB/Ethics Board)
+□ มี Data Use Agreement (DUA) ที่ชัดเจน
+
+B. กฎหมายคุ้มครองข้อมูล
+-------------------------
+□ PDPA (Thailand) - พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+□ FERPA (USA) - Family Educational Rights and Privacy Act
+□ GDPR (EU) - General Data Protection Regulation
+□ กฎหมายอื่นๆ ที่เกี่ยวข้อง
+
+C. จริยธรรมการวิจัย
+-------------------
+□ ไม่เปิดเผยข้อมูลระบุตัวตน
+□ ใช้ข้อมูลเฉพาะวัตถุประสงค์ที่ระบุ
+□ เก็บข้อมูลอย่างปลอดภัย
+□ มีแผนลบทิ้งข้อมูลเมื่อเสร็จสิ้นโครงการ
+
+================================================================================
+2. โครงสร้างไฟล์ข้อมูลที่ต้องการ
+================================================================================
+
+โปรเจคต้องการข้อมูล 7 ไฟล์ CSV ดังนี้:
+
+📁 dataset/ (สร้างโฟลเดอร์นี้)
+├── ID_Group.csv
+├── SJ111777_Attendance15weeks.csv
+├── SJ111777_Score.csv
+├── SJ220777_Attendance15weeks.csv
+├── SJ220777_Score.csv
+├── SJ333777_Attendance15weeks.csv
+└── S333777_Score.csv
+
+โครงสร้างแต่ละไฟล์:
+
+---------------------------------------------------------------------------
+ไฟล์ 1: ID_Group.csv
+---------------------------------------------------------------------------
+StudentID,Group,GPA
+S001,1,3.25
+S002,2,2.89
+S003,1,3.67
+
+คอลัมน์:
+- StudentID (String) : รหัสนักศึกษา (ไม่ซ้ำกัน)
+- Group (Integer) : กลุ่ม/แผนการเรียน (1, 2, 3, ...)
+- GPA (Float) : เกรดเฉลี่ยสะสม (0.00-4.00)
+
+---------------------------------------------------------------------------
+ไฟล์ 2-3: การเข้าเรียนและคะแนนวิชาที่ 1
+---------------------------------------------------------------------------
+
+SJ111777_Attendance15weeks.csv:
+StudentID,Week1,Week2,Week3,...,Week15
+S001,1,1,0,...,1
+S002,1,1,1,...,1
+
+คอลัมน์:
+- StudentID (String)
+- Week1-Week15 (Integer) : 1 = มา, 0 = ขาด
+
+SJ111777_Score.csv:
+StudentID,Tasks(100Points),Quiz(150Points),Project(100Points),Midterm(150Points),Final(150Points),ScoreGrade(100Points)
+S001,85.5,120,90,135,140,85
+S002,78.0,110,85,125,130,78
+
+คอลัมน์:
+- StudentID (String)
+- Tasks(100Points) (Float) : คะแนนงาน (0-100)
+- Quiz(150Points) (Integer) : คะแนนควิซ (0-150)
+- Project(100Points) (Float) : คะแนนโครงงาน (0-100)
+- Midterm(150Points) (Float) : คะแนนสอบกลางภาค (0-150)
+- Final(150Points) (Float) : คะแนนสอบปลายภาค (0-150)
+- ScoreGrade(100Points) (Float) : คะแนนรวมปรับเป็น 100 (0-100)
+
+---------------------------------------------------------------------------
+ไฟล์ 4-5: การเข้าเรียนและคะแนนวิชาที่ 2
+---------------------------------------------------------------------------
+
+SJ220777_Attendance15weeks.csv:
+(โครงสร้างเหมือนวิชา 1)
+
+SJ220777_Score.csv:
+StudentID,Tasks(100Points),Quiz(90Points),Project(90Points),Midterm(180Points),Final(180Points),ScoreGrade(100Points)
+
+คอลัมน์:
+- เหมือนวิชา 1 แต่คะแนนเต็มต่างกัน:
+  Quiz: 90 คะแนน
+  Project: 90 คะแนน
+  Midterm: 180 คะแนน
+  Final: 180 คะแนน
+
+---------------------------------------------------------------------------
+ไฟล์ 6-7: การเข้าเรียนและคะแนนวิชาที่ 3
+---------------------------------------------------------------------------
+
+SJ333777_Attendance15weeks.csv:
+(โครงสร้างเหมือนวิชา 1, 2)
+
+S333777_Score.csv:
+StudentID,Tasks(100Points),Project(100Points),Midterm(100Points),Final(100Points),ScoreGrade(100Points)
+
+คอลัมน์:
+- ไม่มี Quiz
+- คะแนนเต็มทุกอย่าง 100
+
+================================================================================
+3. วิธีเตรียมข้อมูลจริง
+================================================================================
+
+ขั้นตอนที่ 1: Export ข้อมูลจากระบบ
+-----------------------------------
+
+จากระบบ LMS (Learning Management System) หรือฐานข้อมูลของมหาวิทยาลัย:
+
+A. ข้อมูลนักศึกษา:
+   - รหัสนักศึกษา
+   - GPA ปัจจุบัน
+   - กลุ่ม/แผนการเรียน
+
+B. ข้อมูลการเข้าเรียน:
+   - รายวิชาที่ต้องการวิเคราะห์
+   - บันทึกการเข้าเรียนแต่ละสัปดาห์ (15 สัปดาห์)
+
+C. ข้อมูลคะแนน:
+   - คะแนนแต่ละประเภท (งาน, ควิซ, โครงงาน, สอบ)
+   - คะแนนรวมปลายภาค
+
+ขั้นตอนที่ 2: ทำ Anonymization (ปกปิดตัวตน)
+-------------------------------------------
+
+⚠️ สำคัญมาก: ต้องปกปิดข้อมูลระบุตัวตน!
+
+วิธีทำ:
+
+```python
+import pandas as pd
+import hashlib
+
+# โหลดข้อมูลจริง
+df = pd.read_csv('original_student_data.csv')
+
+# สร้าง Anonymous ID
+def anonymize_id(real_id):
+    # ใช้ SHA256 hash + salt
+    salt = "your-secret-salt-here"  # เปลี่ยนเป็น secret ของคุณ
+    hashed = hashlib.sha256(f"{real_id}{salt}".encode()).hexdigest()
+    return f"S{hashed[:8]}"  # ใช้ 8 ตัวอักษรแรก
+
+df['StudentID'] = df['RealStudentID'].apply(anonymize_id)
+
+# ลบคอลัมน์ระบุตัวตน
+df = df.drop(columns=['RealStudentID', 'Name', 'Email', 'PhoneNumber'])
+
+# บันทึก
+df.to_csv('dataset/ID_Group.csv', index=False)
+```
+
+ข้อมูลที่ต้องลบ:
+✗ ชื่อ-นามสกุล
+✗ อีเมล
+✗ เบอร์โทรศัพท์
+✗ วันเกิด (ถ้ามี)
+✗ ที่อยู่
+✗ รหัสนักศึกษาจริง (ใช้ anonymous ID แทน)
+
+ขั้นตอนที่ 3: ตรวจสอบความถูกต้อง
+----------------------------------
+
+```python
+# ตรวจสอบโครงสร้างข้อมูล
+import pandas as pd
+
+# ตรวจสอบคอลัมน์
+id_group = pd.read_csv('dataset/ID_Group.csv')
+print("Columns:", id_group.columns.tolist())
+print("Expected: ['StudentID', 'Group', 'GPA']")
+
+# ตรวจสอบช่วงข้อมูล
+print("\nGPA range:", id_group['GPA'].min(), "-", id_group['GPA'].max())
+print("Expected: 0.00 - 4.00")
+
+# ตรวจสอบ missing values
+print("\nMissing values:")
+print(id_group.isnull().sum())
+
+# ตรวจสอบ duplicates
+print("\nDuplicates:", id_group.duplicated(subset=['StudentID']).sum())
+```
+
+ขั้นตอนที่ 4: จัดรูปแบบให้ตรง
+------------------------------
+
+ใช้สคริปต์นี้:
+
+```python
+# format_real_data.py
+import pandas as pd
+import numpy as np
+
+def format_attendance_data(input_file, output_file):
+    """จัดรูปแบบข้อมูลการเข้าเรียน"""
+    df = pd.read_csv(input_file)
+
+    # ตรวจสอบว่ามีคอลัมน์ครบ
+    required_cols = ['StudentID'] + [f'Week{i}' for i in range(1, 16)]
+
+    for col in required_cols:
+        if col not in df.columns:
+            print(f"⚠️  Missing column: {col}")
+            return False
+
+    # แปลงเป็น 0/1
+    week_cols = [f'Week{i}' for i in range(1, 16)]
+    for col in week_cols:
+        df[col] = df[col].apply(lambda x: 1 if x in [1, 'Y', 'Yes', 'P', 'Present'] else 0)
+
+    # บันทึก
+    df[required_cols].to_csv(output_file, index=False)
+    print(f"✓ Saved: {output_file}")
+    return True
+
+def format_score_data(input_file, output_file, score_columns):
+    """จัดรูปแบบข้อมูลคะแนน"""
+    df = pd.read_csv(input_file)
+
+    required_cols = ['StudentID'] + score_columns
+
+    # ตรวจสอบคอลัมน์
+    for col in required_cols:
+        if col not in df.columns:
+            print(f"⚠️  Missing column: {col}")
+            return False
+
+    # แปลงเป็น numeric
+    for col in score_columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    # บันทึก
+    df[required_cols].to_csv(output_file, index=False)
+    print(f"✓ Saved: {output_file}")
+    return True
+
+# ใช้งาน:
+format_attendance_data('raw/sj111_attendance.csv',
+                      'dataset/SJ111777_Attendance15weeks.csv')
+
+format_score_data('raw/sj111_score.csv',
+                 'dataset/SJ111777_Score.csv',
+                 ['Tasks(100Points)', 'Quiz(150Points)', 'Project(100Points)',
+                  'Midterm(150Points)', 'Final(150Points)', 'ScoreGrade(100Points)'])
+```
+
+================================================================================
+4. วิธีรันโปรเจคกับข้อมูลจริง
+================================================================================
+
+เมื่อเตรียมข้อมูลเรียบร้อยแล้ว:
+
+ขั้นตอนที่ 1: วางไฟล์ข้อมูล
+---------------------------
+```bash
+cd /path/to/datasci
+mkdir -p dataset
+# วางไฟล์ CSV ทั้ง 7 ไฟล์ใน dataset/
+```
+
+ขั้นตอนที่ 2: แก้ไข Path ในโค้ด
+--------------------------------
+เปิดไฟล์ student_grade_prediction.py:
+
+```python
+# บรรทัด ~50
+class DataLoader:
+    def __init__(self, data_dir='synthetic_data'):  # ← เปลี่ยนเป็น 'dataset'
+        self.data_dir = Path(data_dir)
+```
+
+เปลี่ยนเป็น:
+```python
+class DataLoader:
+    def __init__(self, data_dir='dataset'):  # ← ใช้ 'dataset' แทน
+        self.data_dir = Path(data_dir)
+```
+
+ทำเช่นเดียวกันใน data_cleaning_analysis.py:
+```python
+# บรรทัด ~24
+def __init__(self, data_dir='synthetic_data'):  # ← เปลี่ยนเป็น 'dataset'
+```
+
+ขั้นตอนที่ 3: รันโปรเจค
+------------------------
+```bash
+# รัน ML Pipeline
+python3 student_grade_prediction.py
+
+# รัน Data Cleaning Analysis
+python3 data_cleaning_analysis.py
+
+# ดูผลลัพธ์
+ls analysis_output/  # กราฟ 11 ไฟล์
+ls models/           # โมเดลที่เทรนแล้ว
+```
+
+ขั้นตอนที่ 4: ตรวจสอบผลลัพธ์
+-----------------------------
+ดูว่า:
+□ กราฟทุกไฟล์ถูกสร้าง
+□ โมเดลมี R² > 0.80 (ถือว่าดี)
+□ ไม่มี error หรือ warning ผิดปกติ
+□ ข้อมูลใน analysis_output/ สมเหตุสมผล
+
+================================================================================
+5. การปรับแต่งโค้ดสำหรับข้อมูลจริง
+================================================================================
+
+A. ปรับจำนวนวิชาที่วิเคราะห์
+-----------------------------
+
+ถ้าข้อมูลของคุณมีไม่ครบ 3 วิชา หรือมีมากกว่า:
+
+แก้ไขใน student_grade_prediction.py:
+
+```python
+# บรรทัด ~125-148
+def create_features(self):
+    df = self.loader.id_group.copy()
+
+    # ====== เพิ่ม/ลด วิชาตามข้อมูลจริง ======
+
+    # วิชาที่ 1
+    df = self._add_course_features(df, 'SJ111777',
+                                   self.loader.sj111_att,
+                                   self.loader.sj111_score)
+
+    # วิชาที่ 2
+    df = self._add_course_features(df, 'SJ220777',
+                                   self.loader.sj220_att,
+                                   self.loader.sj220_score)
+
+    # วิชาที่ 3
+    df = self._add_course_features(df, 'SJ333777',
+                                   self.loader.sj333_att,
+                                   self.loader.s333_score,
+                                   has_quiz=False)
+
+    # ถ้ามีวิชาที่ 4 เพิ่มตรงนี้
+    # df = self._add_course_features(df, 'SJ444777',
+    #                                self.loader.sj444_att,
+    #                                self.loader.sj444_score)
+
+    return df
+```
+
+B. ปรับเป้าหมายการทำนาย (Target)
+---------------------------------
+
+ถ้าต้องการทำนายวิชาอื่น:
+
+```python
+# บรรทัด ~229
+class ModelTrainer:
+    def __init__(self, df, target_col='sj333777_score'):  # ← เปลี่ยนตรงนี้
+```
+
+C. ปรับ Hyperparameters
+-----------------------
+
+ถ้าข้อมูลจริงมีขนาดต่างจากข้อมูลจำลอง:
+
+```python
+# Lasso Regression
+models['Lasso Regression'] = Lasso(alpha=0.1)  # เพิ่ม/ลด alpha
+
+# Random Forest
+models['Random Forest'] = RandomForestRegressor(
+    n_estimators=200,      # เพิ่มจาก 100
+    max_depth=15,          # ปรับตามข้อมูล
+    random_state=42
+)
+
+# Gradient Boosting
+models['Gradient Boosting'] = GradientBoostingRegressor(
+    n_estimators=150,      # เพิ่มจาก 100
+    learning_rate=0.05,    # ลดถ้า overfit
+    random_state=42
+)
+```
+
+D. ปรับ Train/Test Split
+-------------------------
+
+```python
+# บรรทัด ~245
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,      # 20% สำหรับ test
+    random_state=42
+)
+
+# ถ้าข้อมูลน้อย ใช้ 10-15%
+# ถ้าข้อมูลเยอะ ใช้ 25-30%
+```
+
+================================================================================
+6. ข้อควรระวังและ Best Practices
+================================================================================
+
+⚠️  ข้อควรระวัง
+----------------
+
+1. Data Leakage
+   ✗ อย่าใช้ข้อมูลอนาคตทำนายอดีต
+   ✗ อย่าใช้ข้อมูล test ในการ train
+   ✗ แยก validation set ชัดเจน
+
+2. Overfitting
+   ✗ R² = 1.00 หรือใกล้เคียง = น่าสงสัย
+   ✗ Training R² >> Test R² = overfit
+   ✓ ใช้ Cross-validation
+   ✓ ใช้ Regularization (Lasso, Ridge)
+
+3. Class Imbalance
+   ✗ ถ้านักศึกษาส่วนใหญ่ได้เกรดดี
+   ✓ ใช้ stratified split
+   ✓ พิจารณา SMOTE หรือ class weights
+
+4. Feature Selection
+   ✗ อย่าใช้ features ที่ไม่เกี่ยวข้อง
+   ✓ ตรวจสอบ feature importance
+   ✓ ลบ features ที่ correlation ต่ำ
+
+5. Model Interpretability
+   ✗ อย่าใช้ black box models เพียงอย่างเดียว
+   ✓ อธิบายได้ว่าทำไมโมเดลทำนายแบบนั้น
+   ✓ ใช้ SHAP หรือ LIME สำหรับ explanation
+
+✅ Best Practices
+-----------------
+
+1. เก็บ Log ทุกอย่าง
+   ```python
+   import logging
+   logging.basicConfig(filename='training.log', level=logging.INFO)
+   logging.info(f"Model R²: {r2_score}")
+   ```
+
+2. Version Control
+   ```bash
+   git add .
+   git commit -m "Trained model on real data (2024-10-05)"
+   ```
+
+3. Document Everything
+   - เขียนว่าข้อมูลมาจากไหน
+   - วิธีการ preprocess
+   - Hyperparameters ที่ใช้
+   - ผลลัพธ์ที่ได้
+
+4. Backup ข้อมูล
+   ```bash
+   cp -r dataset/ dataset_backup_2024-10-05/
+   ```
+
+5. Test ก่อน Deploy
+   - ทดสอบกับข้อมูล holdout set
+   - ทดสอบ edge cases
+   - ให้ผู้เชี่ยวชาญตรวจสอบ
+
+================================================================================
+7. การประเมินและ Validation
+================================================================================
+
+Validation Strategy
+-------------------
+
+1. Train/Test Split (80/20)
+2. Cross-Validation (5-fold)
+3. Holdout Set (ข้อมูลเทอมล่าสุด)
+
+```python
+from sklearn.model_selection import cross_val_score, KFold
+
+# K-Fold Cross-Validation
+kfold = KFold(n_splits=5, shuffle=True, random_state=42)
+cv_scores = cross_val_score(model, X, y, cv=kfold, scoring='r2')
+
+print(f"CV R² Scores: {cv_scores}")
+print(f"CV R² Mean: {cv_scores.mean():.4f} (+/- {cv_scores.std():.4f})")
+```
+
+Metrics ที่ต้องดู
+------------------
+
+```python
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+# R² Score (สูงกว่า 0.80 = ดี)
+r2 = r2_score(y_test, y_pred)
+
+# MAE (ต่ำกว่า 5 คะแนน = ดี)
+mae = mean_absolute_error(y_test, y_pred)
+
+# RMSE (ต่ำกว่า 7 คะแนน = ดี)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+# MAPE (ต่ำกว่า 10% = ดี)
+mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+
+print(f"R²: {r2:.4f}")
+print(f"MAE: {mae:.2f} points")
+print(f"RMSE: {rmse:.2f} points")
+print(f"MAPE: {mape:.2f}%")
+```
+
+เกณฑ์ประเมินโมเดล
+-------------------
+
+| Metric | Excellent | Good | Fair | Poor |
+|--------|-----------|------|------|------|
+| R² | > 0.90 | 0.80-0.90 | 0.70-0.80 | < 0.70 |
+| MAE | < 3 | 3-5 | 5-7 | > 7 |
+| RMSE | < 4 | 4-7 | 7-10 | > 10 |
+| MAPE | < 5% | 5-10% | 10-15% | > 15% |
+
+================================================================================
+8. แนวทางปฏิบัติด้าน Privacy
+================================================================================
+
+Data Storage
+------------
+
+✓ เก็บข้อมูลใน encrypted folder
+  ```bash
+  # ใช้ FileVault (macOS) หรือ BitLocker (Windows)
+  # หรือ encrypt ด้วย gpg
+  tar -czf dataset.tar.gz dataset/
+  gpg -c dataset.tar.gz  # จะถามรหัสผ่าน
+  rm -rf dataset/        # ลบต้นฉบับ
+  ```
+
+✓ ตั้งรหัสผ่านเครื่อง
+✓ ไม่เก็บข้อมูลบน cloud ที่ไม่ปลอดภัย
+✗ อย่าใช้ Google Drive, Dropbox แบบธรรมดา
+✓ ใช้ OneDrive for Business หรือ Google Workspace (มี DLP)
+
+Access Control
+--------------
+
+✓ จำกัดผู้เข้าถึง
+✓ ใช้ user permissions
+  ```bash
+  chmod 600 dataset/*.csv  # เฉพาะเจ้าของอ่านได้
+  ```
+
+Data Retention
+--------------
+
+✓ ลบข้อมูลเมื่อเสร็จโครงการ
+  ```bash
+  # ลบแบบปลอดภัย
+  shred -vfz -n 10 dataset/*.csv
+  rm -rf dataset/
+  ```
+
+✓ เก็บ log ว่าลบเมื่อไหร่
+
+================================================================================
+9. Checklist ก่อนใช้งานจริง
+================================================================================
+
+Legal & Ethics
+--------------
+□ ได้รับอนุญาตจากสถาบัน
+□ ผ่านการอนุมัติจริยธรรม
+□ มี Data Use Agreement
+□ นักศึกษารับทราบ (ถ้าจำเป็น)
+
+Data Preparation
+----------------
+□ ข้อมูลครบทั้ง 7 ไฟล์
+□ Anonymize แล้ว (ไม่มีข้อมูลระบุตัวตน)
+□ โครงสร้างตรงตามที่กำหนด
+□ ไม่มี duplicates, missing values ได้รับการจัดการ
+□ ช่วงข้อมูลสมเหตุสมผล (GPA 0-4, คะแนน 0-100)
+
+Technical Setup
+---------------
+□ Python และ packages ติดตั้งครบ
+□ แก้ path ในโค้ดแล้ว
+□ ทดสอบรันกับข้อมูลตัวอย่างก่อน
+□ มี backup ข้อมูลต้นฉบับ
+
+Security
+--------
+□ เครื่องตั้งรหัสผ่าน
+□ ข้อมูล encrypted
+□ Access control ตั้งค่าแล้ว
+□ มีแผนลบข้อมูลเมื่อเสร็จโครงการ
+
+Validation
+----------
+□ ตรวจสอบ data quality
+□ ทดสอบโมเดลกับ holdout set
+□ ผลลัพธ์สมเหตุสมผล
+□ ผู้เชี่ยวชาญตรวจสอบแล้ว
+
+Documentation
+-------------
+□ บันทึกที่มาของข้อมูล
+□ บันทึกวิธีการ preprocess
+□ บันทึก hyperparameters
+□ บันทึกผลลัพธ์และ metrics
+
+================================================================================
+10. ตัวอย่างสคริปต์สำหรับข้อมูลจริง
+================================================================================
+
+สร้างไฟล์ใหม่: prepare_real_data.py
+------------------------------------
+
+```python
+"""
+Prepare Real Student Data for ML Pipeline
+==========================================
+สคริปต์นี้เตรียมข้อมูลจริงให้พร้อมใช้งาน
+"""
+
+import pandas as pd
+import hashlib
+from pathlib import Path
+
+class RealDataPreparator:
+    """เตรียมข้อมูลจริงให้พร้อมใช้"""
+
+    def __init__(self, raw_dir='raw_data', output_dir='dataset'):
+        self.raw_dir = Path(raw_dir)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(exist_ok=True)
+
+        # Secret salt สำหรับ hashing (เปลี่ยนเป็นของคุณ)
+        self.SALT = "change-this-to-your-secret-salt"
+
+    def anonymize_student_id(self, real_id):
+        """สร้าง Anonymous ID จาก Real ID"""
+        hashed = hashlib.sha256(f"{real_id}{self.SALT}".encode()).hexdigest()
+        return f"S{hashed[:8].upper()}"
+
+    def prepare_id_group(self, input_file):
+        """เตรียมไฟล์ ID_Group"""
+        print("📋 Preparing ID_Group.csv...")
+
+        df = pd.read_csv(self.raw_dir / input_file)
+
+        # Anonymize
+        df['StudentID'] = df['RealStudentID'].apply(self.anonymize_student_id)
+
+        # เก็บเฉพาะคอลัมน์ที่ต้องการ
+        df = df[['StudentID', 'Group', 'GPA']]
+
+        # Validate
+        assert df['GPA'].between(0, 4).all(), "GPA out of range!"
+        assert df['StudentID'].is_unique, "Duplicate StudentIDs!"
+
+        # Save
+        output_file = self.output_dir / 'ID_Group.csv'
+        df.to_csv(output_file, index=False)
+        print(f"✓ Saved: {output_file}")
+        print(f"  Students: {len(df)}")
+
+    def prepare_attendance(self, input_file, output_filename):
+        """เตรียมไฟล์การเข้าเรียน"""
+        print(f"📅 Preparing {output_filename}...")
+
+        df = pd.read_csv(self.raw_dir / input_file)
+
+        # Anonymize
+        df['StudentID'] = df['RealStudentID'].apply(self.anonymize_student_id)
+
+        # แปลงเป็น 0/1
+        week_cols = [f'Week{i}' for i in range(1, 16)]
+        for col in week_cols:
+            df[col] = df[col].apply(lambda x: 1 if x in [1, 'Y', 'Yes', 'P', 'Present', True] else 0)
+
+        # เก็บเฉพาะคอลัมน์ที่ต้องการ
+        df = df[['StudentID'] + week_cols]
+
+        # Save
+        output_file = self.output_dir / output_filename
+        df.to_csv(output_file, index=False)
+        print(f"✓ Saved: {output_file}")
+
+    def prepare_scores(self, input_file, output_filename, score_cols):
+        """เตรียมไฟล์คะแนน"""
+        print(f"📊 Preparing {output_filename}...")
+
+        df = pd.read_csv(self.raw_dir / input_file)
+
+        # Anonymize
+        df['StudentID'] = df['RealStudentID'].apply(self.anonymize_student_id)
+
+        # แปลงเป็น numeric
+        for col in score_cols:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # เก็บเฉพาะคอลัมน์ที่ต้องการ
+        df = df[['StudentID'] + score_cols]
+
+        # Validate
+        for col in score_cols:
+            max_score = int(col.split('(')[1].split('Points')[0])
+            assert df[col].between(0, max_score, na=True).all(), f"{col} out of range!"
+
+        # Save
+        output_file = self.output_dir / output_filename
+        df.to_csv(output_file, index=False)
+        print(f"✓ Saved: {output_file}")
+
+    def prepare_all(self):
+        """เตรียมทุกไฟล์"""
+        print("=" * 60)
+        print("🚀 Preparing Real Data for ML Pipeline")
+        print("=" * 60)
+
+        # ID & Group
+        self.prepare_id_group('students.csv')
+
+        # Course 1
+        self.prepare_attendance('sj111_attendance.csv', 'SJ111777_Attendance15weeks.csv')
+        self.prepare_scores('sj111_scores.csv', 'SJ111777_Score.csv',
+                           ['Tasks(100Points)', 'Quiz(150Points)', 'Project(100Points)',
+                            'Midterm(150Points)', 'Final(150Points)', 'ScoreGrade(100Points)'])
+
+        # Course 2
+        self.prepare_attendance('sj220_attendance.csv', 'SJ220777_Attendance15weeks.csv')
+        self.prepare_scores('sj220_scores.csv', 'SJ220777_Score.csv',
+                           ['Tasks(100Points)', 'Quiz(90Points)', 'Project(90Points)',
+                            'Midterm(180Points)', 'Final(180Points)', 'ScoreGrade(100Points)'])
+
+        # Course 3
+        self.prepare_attendance('sj333_attendance.csv', 'SJ333777_Attendance15weeks.csv')
+        self.prepare_scores('s333_scores.csv', 'S333777_Score.csv',
+                           ['Tasks(100Points)', 'Project(100Points)',
+                            'Midterm(100Points)', 'Final(100Points)', 'ScoreGrade(100Points)'])
+
+        print("\n" + "=" * 60)
+        print("✅ All files prepared successfully!")
+        print("=" * 60)
+        print("\nNext steps:")
+        print("1. Verify files in dataset/ folder")
+        print("2. Update code to use 'dataset' directory")
+        print("3. Run: python3 student_grade_prediction.py")
+
+
+# ใช้งาน:
+if __name__ == '__main__':
+    preparator = RealDataPreparator()
+    preparator.prepare_all()
+```
+
+วิธีใช้:
+```bash
+# 1. เตรียมโฟลเดอร์
+mkdir raw_data
+
+# 2. วางไฟล์ข้อมูลจริง (ยังไม่ anonymize) ใน raw_data/
+#    - students.csv
+#    - sj111_attendance.csv
+#    - sj111_scores.csv
+#    - ... (ตามต้องการ)
+
+# 3. รันสคริปต์
+python3 prepare_real_data.py
+
+# 4. ตรวจสอบผลลัพธ์
+ls dataset/
+
+# 5. ลบข้อมูลต้นฉบับ (ระวัง! backup ก่อน)
+# rm -rf raw_data/
+```
+
+================================================================================
+สรุป
+================================================================================
+
+การใช้ข้อมูลจริงต้อง:
+
+1. ✅ ได้รับอนุญาตอย่างถูกต้อง
+2. ✅ Anonymize ข้อมูลระบุตัวตน
+3. ✅ จัดรูปแบบให้ตรงตามที่กำหนด
+4. ✅ ตรวจสอบคุณภาพข้อมูล
+5. ✅ เก็บรักษาอย่างปลอดภัย
+6. ✅ Validate ผลลัพธ์โมเดล
+7. ✅ ลบทิ้งเมื่อเสร็จโครงการ
+
+⚠️ อย่าลืม: ข้อมูลนักศึกษาเป็นข้อมูลสำคัญ ต้องจัดการอย่างรอบคอบ!
+
+================================================================================
